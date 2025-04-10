@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"go-restapi/internal/config"
-	"go-restapi/internal/model"
+	"go-restapi/internal/handler"
 	"go-restapi/internal/repository"
+	"go-restapi/internal/service"
 	"log"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
 
@@ -35,42 +37,11 @@ func conectToRepository() repository.NoteRepository {
 }
 
 func main() {
-	var dr repository.NoteRepository
-	dr = conectToRepository()
-
+	var dr repository.NoteRepository = conectToRepository()
+	var sr service.NoteService = service.NewNoteService(dr)
+	var hand handler.NoteHandler = handler.NewNoteHandler(sr)
 	// Правильно сохраняем и используем функцию отмены
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel() // Важно: всегда вызывайте cancel в конце
 
-	// var note model.Note
-	notes, err := dr.GetAll(ctx)
-	if err != nil {
-		log.Fatalf("Ошибка выполнения запроса: %v", err)
-	}
-	log.Println("Полученные заметки:")
-	for _, note := range notes {
-		log.Printf("\tnote.Id:%d\tnote.Title:%s\tnote.Content:%s\n", note.Id, note.Title, note.Content)
-	}
-	// note = model.Note{
-	// 	Title:   "Заметка 1",
-	// 	Content: "Содержимое заметки 1",
-	// }
-	dr.Create(ctx, &model.Note{
-		Title:   "Заметка 1",
-		Content: "Содержимое заметки 1",
-	})
-	dr.Update(ctx, &model.Note{
-		Id:      10,
-		Title:   "Обновленная заметка 1",
-		Content: "Обновленное содержимое заметки 1",
-	})
-	// Получаем обновленный список после создания
-	notes, err = dr.GetAll(ctx)
-	if err != nil {
-		log.Fatalf("Ошибка выполнения запроса: %v", err)
-	}
-	log.Println("Полученные заметки после создания:")
-	for _, note := range notes {
-		log.Printf("\tnote.Id:%d\tnote.Title:%s\tnote.Content:%s\n", note.Id, note.Title, note.Content)
-	}
+	r := gin.Default()
+	r.GET("/", hand.GetNoteByID)
 }
