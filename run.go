@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"go-restapi/internal/config"
-	"go-restapi/internal/handler"
+	"go-restapi/internal/model"
+	"go-restapi/internal/repository"
 	"log"
 	"time"
 
@@ -28,40 +29,48 @@ func conectToDB() (*sql.DB, error) {
 	return db, nil
 }
 
-func conectToHandler() handler.NoteHandler {
+func conectToRepository() repository.NoteRepository {
 	db, _ := conectToDB()
-	return handler.NewNoteHandler(db)
+	return repository.NewNoteRepository(db)
 }
 
 func main() {
-	var dr handler.NoteHandler
-	dr = conectToHandler()
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	note, err := dr.GetById(ctx, 3)
-	if err != nil {
-		log.Fatalf("Ошибка выполнения запроса: %v", err)
-	}
+	var dr repository.NoteRepository
+	dr = conectToRepository()
 
-	log.Printf("\tnote.Id:%d\tnote.Title:%s\tnote.Content:%s\n", note.Id, note.Title, note.Content)
+	// Правильно сохраняем и используем функцию отмены
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel() // Важно: всегда вызывайте cancel в конце
 
+	// var note model.Note
 	notes, err := dr.GetAll(ctx)
 	if err != nil {
 		log.Fatalf("Ошибка выполнения запроса: %v", err)
 	}
+	log.Println("Полученные заметки:")
 	for _, note := range notes {
 		log.Printf("\tnote.Id:%d\tnote.Title:%s\tnote.Content:%s\n", note.Id, note.Title, note.Content)
 	}
-
-	// row := db.QueryRow("SELECT id, title, content FROM note WHERE id = $1", 1)
-	// if err := row.Scan(&note.Id, &note.Title, &note.Content); err != nil {
-	// 	log.Fatalf("Ошибка выполнения запроса: %v", err)
+	// note = model.Note{
+	// 	Title:   "Заметка 1",
+	// 	Content: "Содержимое заметки 1",
 	// }
-	// log.Printf("ID: %d, Title: %s, Content: %s\n", note.Id, note.Title, note.Content)
-
-	// for rows.Next() {
-	// 	if err := rows.Scan(&id, &name, &age); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	fmt.Printf("ID: %d, Name: %s, Age: %d\n", id, name, age)
-	// }
+	dr.Create(ctx, &model.Note{
+		Title:   "Заметка 1",
+		Content: "Содержимое заметки 1",
+	})
+	dr.Update(ctx, &model.Note{
+		Id:      10,
+		Title:   "Обновленная заметка 1",
+		Content: "Обновленное содержимое заметки 1",
+	})
+	// Получаем обновленный список после создания
+	notes, err = dr.GetAll(ctx)
+	if err != nil {
+		log.Fatalf("Ошибка выполнения запроса: %v", err)
+	}
+	log.Println("Полученные заметки после создания:")
+	for _, note := range notes {
+		log.Printf("\tnote.Id:%d\tnote.Title:%s\tnote.Content:%s\n", note.Id, note.Title, note.Content)
+	}
 }
