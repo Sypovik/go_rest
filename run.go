@@ -21,7 +21,13 @@ func conectToDB() (*sql.DB, error) {
 	if err != nil {
 		log.Fatalf("Ошибка создания объекта БД: %v", err) // Переименуем сообщение
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+	Timeout, err := time.ParseDuration(config.DBTimeout)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), Timeout)
 	defer cancel()
 
 	if err := db.PingContext(ctx); err != nil {
@@ -43,5 +49,7 @@ func main() {
 	// Правильно сохраняем и используем функцию отмены
 
 	r := gin.Default()
-	r.GET("/", hand.GetNoteByID)
+	hand.RegisterRoutes(r)
+
+	r.Run(":8083") // Запускаем сервер на порту 8083
 }
