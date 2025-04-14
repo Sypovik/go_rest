@@ -43,13 +43,18 @@ func conectToRepository() repository.NoteRepository {
 }
 
 func main() {
-	var dr repository.NoteRepository = conectToRepository()
+	db, _ := repository.SetupDatabase()
+	var dr repository.NoteRepository = repository.NewNoteRepository(db)
 	var sr service.NoteService = service.NewNoteService(dr)
 	var hand handler.NoteHandler = handler.NewNoteHandler(sr)
 	// Правильно сохраняем и используем функцию отмены
 
 	r := gin.Default()
 	hand.RegisterRoutes(r)
+
+	r.GET("/favicon.ico", func(c *gin.Context) {
+		c.Status(204) // No Content
+	})
 
 	r.Run(":8083") // Запускаем сервер на порту 8083
 }
