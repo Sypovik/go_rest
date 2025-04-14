@@ -1,0 +1,6 @@
+# .air.toml
+root = "."
+
+[build]
+  include_ext = ["go"]
+  exclude_dir = ["vendor", "tmp", "data", "migrations"]
