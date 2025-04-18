@@ -12,7 +12,7 @@ import (
 // Определение ошибок сервисного уровня
 var (
 	ErrNoteNotFound   = errors.New("note not found")
-	ErrInvalidNoteID  = errors.New("invalid note Id")
+	ErrInvalidNoteID  = errors.New("invalid note ID")
 	ErrEmptyNoteTitle = errors.New("note title cannot be empty")
 )
 
@@ -57,7 +57,7 @@ func (s *noteService) CreateNote(ctx context.Context, note *model.Note) error {
 	return nil
 }
 
-// GetNoteByID получает заметку по Id
+// GetNoteByID получает заметку по ID
 func (s *noteService) GetNoteByID(ctx context.Context, id int) (*model.Note, error) {
 	// Валидация
 	if id <= 0 {
@@ -70,7 +70,7 @@ func (s *noteService) GetNoteByID(ctx context.Context, id int) (*model.Note, err
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNoteNotFound
 		}
-		log.Printf("Error getting note by Id %d: %v", id, err)
+		log.Printf("Error getting note by ID %d: %v", id, err)
 		return nil, err
 	}
 
@@ -91,7 +91,7 @@ func (s *noteService) GetAllNotes(ctx context.Context) ([]model.Note, error) {
 // UpdateNote обновляет существующую заметку
 func (s *noteService) UpdateNote(ctx context.Context, note *model.Note) error {
 	// Валидация
-	if note.Id <= 0 {
+	if note.ID <= 0 {
 		return ErrInvalidNoteID
 	}
 	if note.Title == "" {
@@ -99,7 +99,7 @@ func (s *noteService) UpdateNote(ctx context.Context, note *model.Note) error {
 	}
 
 	// Проверка существования заметки
-	_, err := s.repo.GetById(ctx, note.Id)
+	_, err := s.repo.GetById(ctx, note.ID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrNoteNotFound
@@ -108,18 +108,18 @@ func (s *noteService) UpdateNote(ctx context.Context, note *model.Note) error {
 	}
 
 	// Логирование
-	log.Printf("Updating note Id %d: %s", note.Id, note.Title)
+	log.Printf("Updating note ID %d: %s", note.ID, note.Title)
 
 	// Вызов репозитория
 	if err := s.repo.Update(ctx, note); err != nil {
-		log.Printf("Error updating note Id %d: %v", note.Id, err)
+		log.Printf("Error updating note ID %d: %v", note.ID, err)
 		return err
 	}
 
 	return nil
 }
 
-// DeleteNote удаляет заметку по Id
+// DeleteNote удаляет заметку по ID
 func (s *noteService) DeleteNote(ctx context.Context, id int) error {
 	// Валидация
 	if id <= 0 {
@@ -136,11 +136,11 @@ func (s *noteService) DeleteNote(ctx context.Context, id int) error {
 	}
 
 	// Логирование
-	log.Printf("Deleting note Id %d", id)
+	log.Printf("Deleting note ID %d", id)
 
 	// Вызов репозитория
 	if err := s.repo.Delete(ctx, id); err != nil {
-		log.Printf("Error deleting note Id %d: %v", id, err)
+		log.Printf("Error deleting note ID %d: %v", id, err)
 		return err
 	}
 

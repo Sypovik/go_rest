@@ -30,7 +30,7 @@ func (r *noteRepository) Create(ctx context.Context, note *model.Note) error {
 		VALUES ($1, $2)
 		RETURNING id
 	`
-	return r.db.QueryRowContext(ctx, query, note.Title, note.Content).Scan(&note.Id)
+	return r.db.QueryRowContext(ctx, query, note.Title, note.Content).Scan(&note.ID)
 }
 
 func (r *noteRepository) GetById(ctx context.Context, id int) (*model.Note, error) {
@@ -40,7 +40,7 @@ func (r *noteRepository) GetById(ctx context.Context, id int) (*model.Note, erro
 		WHERE id = $1
 	`
 	var note model.Note
-	if err := r.db.QueryRowContext(ctx, query, id).Scan(&note.Id, &note.Title, &note.Content); err != nil {
+	if err := r.db.QueryRowContext(ctx, query, id).Scan(&note.ID, &note.Title, &note.Content); err != nil {
 		return nil, err
 	}
 	return &note, nil
@@ -61,7 +61,7 @@ func (r *noteRepository) GetAll(ctx context.Context) ([]model.Note, error) {
 	var notes []model.Note
 	for rows.Next() {
 		note := model.Note{}
-		if err := rows.Scan(&note.Id, &note.Title, &note.Content); err != nil {
+		if err := rows.Scan(&note.ID, &note.Title, &note.Content); err != nil {
 			return nil, err
 		}
 		notes = append(notes, note)
@@ -81,7 +81,7 @@ func (r *noteRepository) Update(ctx context.Context, note *model.Note) error {
 		WHERE id = $3
 	`
 
-	result, err := r.db.ExecContext(ctx, query, note.Title, note.Content, note.Id)
+	result, err := r.db.ExecContext(ctx, query, note.Title, note.Content, note.ID)
 	if err != nil {
 		return err
 	}
@@ -98,7 +98,7 @@ func (r *noteRepository) Update(ctx context.Context, note *model.Note) error {
 	return nil
 }
 
-// Delete удаляет заметку по Id
+// Delete удаляет заметку по ID
 func (r *noteRepository) Delete(ctx context.Context, id int) error {
 	query := `
 		DELETE FROM note

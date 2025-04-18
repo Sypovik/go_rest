@@ -72,7 +72,7 @@ func TestGetNoteByID_Success(t *testing.T) {
 	mockRepo := repository.NewMockNoteRepository(ctrl)
 
 	expectedNote := &model.Note{
-		Id:      1,
+		ID:      1,
 		Title:   "Test Note",
 		Content: "Test Content",
 	}

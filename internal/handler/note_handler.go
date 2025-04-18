@@ -79,7 +79,7 @@ func (h *noteHandler) UpdateNote(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
-	note.Id = id
+	note.ID = id
 
 	if err := h.service.UpdateNote(c.Request.Context(), &note); err != nil {
 		switch err {
@@ -155,7 +155,7 @@ func (h *noteHandler) GetNoteByID(c *gin.Context) {
 		return
 	}
 
-	log.Printf("Заметка получена внутри handler: %d", note.Id)
+	log.Printf("Заметка получена внутри handler: %d", note.ID)
 
 	// 4. Успешный ответ
 	c.JSON(http.StatusOK, note)
