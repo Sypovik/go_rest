@@ -27,12 +27,16 @@ type Config struct {
 
 func LoadConfig() *Config {
 	configPath := os.Getenv("CONFIG_PATH")
-	var cfg Config
+
+	if _, err := os.Stat(configPath); err != nil {
+		configPath = ".env"
+	}
 
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		log.Fatalf("config file not found: %s", err)
 	}
 
+	var cfg Config
 	err := cleanenv.ReadConfig(configPath, &cfg)
 	if os.IsNotExist(err) {
 		log.Fatalf("error reading config file: %s", err)
